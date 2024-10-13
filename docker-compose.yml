@@ -1,0 +1,15 @@
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: grpc-app-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: grpc
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
