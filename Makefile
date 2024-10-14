@@ -10,4 +10,7 @@ migrateup:
 migratedown:
 	migrate -path db/migrations -database "postgresql://root:password@localhost:5432/grpc?sslmode=disable" -verbose down
 
-.PHONY: createdb dropdb migrateup migratedown
+sqlc:
+	sqlc generate
+
+.PHONY: createdb dropdb migrateup migratedown sqlc
