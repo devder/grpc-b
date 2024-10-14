@@ -1,7 +1,16 @@
 createdb:
-	docker exec -it grpc-app-db createdb --username=root --owner=root grpc
+	docker exec grpc-app-db createdb --username=root --owner=root grpc
 
 dropdb:
-	docker exec -it grpc-app-db dropdb grpc
+	docker exec grpc-app-db dropdb grpc
 
-.PHONY: createdb dropdb
+migrateup:
+	migrate -path db/migrations -database "postgresql://root:password@localhost:5432/grpc?sslmode=disable" -verbose up
+
+migratedown:
+	migrate -path db/migrations -database "postgresql://root:password@localhost:5432/grpc?sslmode=disable" -verbose down
+
+sqlc:
+	sqlc generate
+
+.PHONY: createdb dropdb migrateup migratedown sqlc
