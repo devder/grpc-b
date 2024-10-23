@@ -16,15 +16,17 @@ const (
 )
 
 var testQueries *Queries // define as global var bc we would use it in all our unit tests
+var testDb *sql.DB
 
 func TestMain(m *testing.M) {
-	db, err := sql.Open(driverName, dataSourceName)
+	var err error
+	testDb, err = sql.Open(driverName, dataSourceName)
 
 	if err != nil {
 		log.Fatal("failed to connect to DB:", err)
 	}
 
-	testQueries = New(db)
+	testQueries = New(testDb)
 
 	os.Exit(m.Run()) // run tests
 }
