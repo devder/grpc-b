@@ -12,6 +12,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # use services keyword to specify a list of external services
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: root
+          POSTGRES_DB: grpc
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,9 +35,15 @@ jobs:
         with:
           go-version: "^1.23"
 
-      # not necessary bc it will be done by go test
-      # - name: Build
-      #   run: go build -v ./...
+      - name: Run migrations
+        run: make migrateup
 
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
+          sudo mv migrate.linux-amd64 /usr/local/bin/migrate
+          which migrate
+
+      # the build process will be done by go test
       - name: Test
         run: make test
