@@ -12,6 +12,11 @@ INSERT INTO accounts (
 SELECT * FROM accounts 
 WHERE id = $1 LIMIT 1;
 
+-- name: GetAccountForUpdate :one
+SELECT * FROM accounts 
+WHERE id = $1 LIMIT 1 
+FOR NO KEY UPDATE; -- to prevent deadlock and to tell postgres not to lock the table bc the primary key won't be locked
+
 -- name: ListAccounts :many
 SELECT * FROM accounts
 ORDER BY id

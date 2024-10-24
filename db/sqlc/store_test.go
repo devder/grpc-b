@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,9 +23,13 @@ func TestTransferTx(t *testing.T) {
 	errs := make(chan error)
 	results := make(chan TransferTxResult)
 
-	for range n {
+	for i := range n {
+		// used to pass context but not required
+		txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
-			result, err := store.TransferTx(context.Background(), TransferTxParams{
+			// to get the db transaction name
+			ctx := context.WithValue(context.Background(), txKey, txName)
+			result, err := store.TransferTx(ctx, TransferTxParams{
 				FromAccountID: acc1.ID,
 				ToAccountID:   acc2.ID,
 				Amount:        amount,
@@ -35,6 +41,7 @@ func TestTransferTx(t *testing.T) {
 	}
 
 	// check results
+	existed := make(map[int]bool)
 	for range n {
 		err := <-errs
 		require.NoError(t, err)
@@ -75,6 +82,35 @@ func TestTransferTx(t *testing.T) {
 		_, err = store.GetEntry(context.Background(), int32(toEntry.ID))
 		require.NoError(t, err)
 
+		// check acc
+		fromAcc := result.FromAccount
+		require.NotEmpty(t, fromAcc)
+		require.Equal(t, acc1.ID, fromAcc.ID)
+
+		toAcc := result.ToAccount
+		require.NotEmpty(t, toAcc)
+		require.Equal(t, acc2.ID, toAcc.ID)
+
 		// check acc balance
+		diff1 := acc1.Balance - fromAcc.Balance
+		diff2 := toAcc.Balance - acc2.Balance
+		require.Equal(t, diff1, diff2)
+		require.True(t, diff1 > 0)
+		require.True(t, math.Mod(diff1, amount) == 0) // similar to diff1%amount == 0
+
+		k := int(diff1 / amount)
+		require.True(t, k >= 1 && k <= n)
+		require.NotContains(t, existed, k)
+		existed[k] = true
 	}
+
+	// check the final updated balances
+	updatedAccount1, err := testQueries.GetAccount(context.Background(), acc1.ID)
+	require.NoError(t, err)
+
+	updatedAccount2, err := testQueries.GetAccount(context.Background(), acc2.ID)
+	require.NoError(t, err)
+
+	require.Equal(t, acc1.Balance-(float64(n)*amount), updatedAccount1.Balance)
+	require.Equal(t, acc2.Balance+(float64(n)*amount), updatedAccount2.Balance)
 }
