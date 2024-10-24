@@ -6,18 +6,17 @@ import (
 
 	"github.com/devder/grpc-b/api"
 	db "github.com/devder/grpc-b/db/sqlc"
+	"github.com/devder/grpc-b/util"
 	_ "github.com/lib/pq"
 )
 
-// update to env
-const (
-	driverName     = "postgres"
-	dataSourceName = "postgresql://root:password@localhost:5432/grpc?sslmode=disable"
-	serverAddress  = "0.0.0.0:8080"
-)
-
 func main() {
-	conn, err := sql.Open(driverName, dataSourceName)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("could not load config file")
+	}
+
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
 
 	if err != nil {
 		log.Fatal("failed to connect to DB:", err)
@@ -26,7 +25,7 @@ func main() {
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server:", err)
 	}
