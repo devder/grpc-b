@@ -43,6 +43,12 @@ jobs:
           sudo mv migrate /usr/local/bin/migrate
           which migrate
 
+      - name: Create app.env
+        run: |
+          echo "DB_DRIVER=${{ secrets.DB_DRIVER }}" >> app.env
+          echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> app.env
+          echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
+
       - name: Run migrations
         run: make migrateup
 
