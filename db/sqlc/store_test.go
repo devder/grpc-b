@@ -92,8 +92,8 @@ func TestTransferTx(t *testing.T) {
 		require.Equal(t, acc2.ID, toAcc.ID)
 
 		// check acc balance
-		diff1 := acc1.Balance - fromAcc.Balance
-		diff2 := toAcc.Balance - acc2.Balance
+		diff1 := math.Round((acc1.Balance-fromAcc.Balance)*100) / 100 // round to two dp
+		diff2 := math.Round((toAcc.Balance-acc2.Balance)*100) / 100
 		require.Equal(t, diff1, diff2)
 		require.True(t, diff1 > 0)
 		require.True(t, math.Mod(diff1, amount) == 0) // similar to diff1%amount == 0
