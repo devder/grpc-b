@@ -10,7 +10,7 @@ import (
 
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=EUR USD CAD"`
+	Currency string `json:"currency" binding:"required,currency"` // currency binding here was registered as a custom validator in server.go
 }
 
 type getAccountRequest struct {
