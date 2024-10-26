@@ -1,6 +1,10 @@
 volumes:
   postgres_data:
 
+networks:
+  default:
+    name: grpc_network
+
 services:
   db:
     image: postgres:16-alpine
@@ -13,3 +17,15 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: grpc-app
+    environment:
+      GIN_MODE: release
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
