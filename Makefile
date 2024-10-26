@@ -10,6 +10,10 @@ migrateup:
 migratedown:
 	migrate -path db/migrations -database "postgresql://root:password@localhost:5432/grpc?sslmode=disable" -verbose down
 
+# rollback last migration
+migratedown1:
+	migrate -path db/migrations -database "postgresql://root:password@localhost:5432/grpc?sslmode=disable" -verbose down 1
+
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/devder/grpc-b/db/sqlc Store
 
@@ -22,4 +26,4 @@ test:
 server:
 	go run main.go
 
-.PHONY: createdb dropdb migrateup migratedown sqlc server mock test
+.PHONY: createdb dropdb migrateup migratedown sqlc server mock test migratedown1
