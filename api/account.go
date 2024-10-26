@@ -10,7 +10,6 @@ import (
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"` // currency binding here was registered as a custom validator in server.go
 }
 
@@ -30,9 +29,15 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload, err := getPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	arg := db.CreateAccountParams{
 		Balance:  0,
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 	}
 
@@ -64,6 +69,12 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload, err := getPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	account, err := server.store.GetAccount(ctx, req.ID)
 
 	if err != nil {
@@ -74,6 +85,13 @@ func (server *Server) getAccount(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
+	}
+
+	if account.Owner != authPayload.Username {
+		// account does not belong to the authenticated user
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return
+
 	}
 
 	ctx.JSON(http.StatusOK, account)
@@ -87,9 +105,16 @@ func (server *Server) getAccounts(ctx *gin.Context) {
 		return
 	}
 
+	authPayload, err := getPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	arg := db.ListAccountsParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageId - 1) * req.PageSize,
+		Owner:  authPayload.Username,
 	}
 
 	accounts, err := server.store.ListAccounts(ctx, arg)

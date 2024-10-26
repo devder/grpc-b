@@ -51,3 +51,11 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 
 	}
 }
+
+func getPayload(ctx *gin.Context) (*token.Payload, error) {
+	if authPayload, ok := ctx.MustGet(authorizationPayloadKey).(*token.Payload); ok {
+		return authPayload, nil
+	} else {
+		return nil, fmt.Errorf("unauthorized request")
+	}
+}
