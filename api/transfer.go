@@ -37,6 +37,7 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 
 	if authPayload.Username != fromAcc.Owner {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("users can only transfer from their own accounts")))
+		return
 	}
 
 	if _, valid = server.validAccount(ctx, req.ToAccountID, req.Currency); !valid {
