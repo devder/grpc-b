@@ -99,7 +99,7 @@ func TestGetAccountApi(t *testing.T) {
 			v.buildStubs(mockStore)
 
 			// start test server and send request
-			server := NewServer(mockStore)
+			server := newTestServer(t, mockStore)
 			// to test a http API in go, we don't need to start a real server
 			recorder := httptest.NewRecorder()
 
