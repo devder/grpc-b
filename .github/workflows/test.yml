@@ -1,0 +1,59 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Run unit tests
+
+on:
+  # push:
+  #   branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # use services keyword to specify a list of external services
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: root
+          POSTGRES_DB: grpc
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "^1.23"
+
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+          which migrate
+
+      - name: Create app.env
+        run: |
+          echo "DB_DRIVER=${{ secrets.DB_DRIVER }}" >> app.env
+          echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> app.env
+          echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
+          echo "TOKEN_SYMMETRIC_KEY=${{ secrets.TOKEN_SYMMETRIC_KEY }}" >> app.env
+          echo "ACCESS_TOKEN_DURATION=${{ secrets.ACCESS_TOKEN_DURATION }}" >> app.env
+
+      - name: Run migrations
+        run: make migrateup
+
+      # the build process will be done by go test
+      - name: Test
+        run: make test
