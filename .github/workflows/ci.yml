@@ -8,6 +8,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Build image
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repo
@@ -22,6 +25,10 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Load AWS secrets from aws secrets manager
+        run: |
+          aws secretsmanager get-secret-value --secret-id ${{ secrets.SECRET_NAME }} --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
 
       - name: Build, tag, and push docker image to Amazon ECR
         env:
