@@ -2,7 +2,10 @@
 
 # Exit immediately if a command exits with a non-zero status
 set -e
+
 echo "run db migration"
+# load the environment variables
+source /usr/src/app/app.env
 /usr/src/app/migrate -path db/migrations -database "$DB_SOURCE" -verbose up
 
 echo "start the app"
