@@ -8,6 +8,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: Build image
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repo
