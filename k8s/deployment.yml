@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployment
+  labels:
+    app: grpc-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-api
+  template:
+    metadata:
+      labels:
+        app: grpc-api
+    spec:
+      containers:
+        - name: grpc-api
+          image: 975049907833.dkr.ecr.eu-central-1.amazonaws.com/grpc:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080

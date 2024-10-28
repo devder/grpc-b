@@ -21,7 +21,7 @@ COPY --from=builder /usr/src/app/main .
 COPY --from=builder /usr/src/app/migrate .
 COPY db/migrations ./db/migrations
 
-# TODO: remove
+# app.env for prod is injected in CI workflow
 COPY app.env .
 COPY start.sh .
 

@@ -42,6 +42,12 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 func (server *Server) setUpRouter() {
 	router := gin.Default()
 
+	err := router.SetTrustedProxies(nil)
+
+	if err != nil {
+		fmt.Printf("Failed to set trusted proxies: %v", err)
+	}
+
 	// users endpoints
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
