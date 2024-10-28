@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  # authenticate with IAM, this useful when you want to grant auth to a user who is not the creator of the cluster
+  mapUsers: |
+    - userarn: arn:aws:iam::975049907833:user/achiever
+      username: achiever
+      groups:
+        - system:masters
