@@ -29,6 +29,7 @@ jobs:
       - name: Load AWS secrets from aws secrets manager
         run: |
           aws secretsmanager get-secret-value --secret-id ${{ secrets.SECRET_NAME }} --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > app.env
+          echo "GIN_MODE=release" >> app.env
 
       - name: Build, tag, and push docker image to Amazon ECR
         env:
