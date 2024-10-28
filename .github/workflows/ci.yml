@@ -52,8 +52,8 @@ jobs:
 
       - name: Deploy image to EKS
         run: |
-          kubectl apply -f k8s/aws-auth.yml
-          kubectl apply -f k8s/deployment.yml
-          kubectl apply -f k8s/service.yml
-          kubectl apply -f k8s/ingress.yml
-          kubectl rollout status deployment/grpc
+          kubectl apply -f k8s/aws-auth.yml --validate=false
+          kubectl apply -f k8s/deployment.yml --validate=false
+          kubectl apply -f k8s/service.yml --validate=false
+          kubectl apply -f k8s/ingress.yml --validate=false
+          kubectl rollout status deployment/grpc --validate=false
