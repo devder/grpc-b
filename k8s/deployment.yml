@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: grpc-api
-          image: 975049907833.dkr.ecr.eu-central-1.amazonaws.com/grpc:09192eb8c09cbe530134afa958e99e4df96800e0
+          image: 975049907833.dkr.ecr.eu-central-1.amazonaws.com/grpc:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
