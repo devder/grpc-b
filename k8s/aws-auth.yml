@@ -10,3 +10,8 @@ data:
       username: achiever
       groups:
         - system:masters
+  mapRoles: |
+    - rolearn: arn:aws:iam::975049907833:role/GitHubActionsRole
+      username: github-actions
+      groups:
+        - system:masters
