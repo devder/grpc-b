@@ -11,12 +11,14 @@ option go_package = "github.com/devder/grpc-b/pb";
 
 service GrpcApp {
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    // to add http method and path to the rpc for the grpc-gateway
     option (google.api.http) = {
       post: "/v1/create_user"
       body: "*"
     };
   }
   rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
+    // to add http method and path to the rpc for the grpc-gateway
     option (google.api.http) = {
       post: "/v1/login_user"
       body: "*"
