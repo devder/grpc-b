@@ -20,7 +20,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 			return nil, status.Errorf(codes.NotFound, "incorrect password or user not found")
 		}
 
-		fmt.Println("err > %w", err)
+		fmt.Println("err :>", err)
 		return nil, status.Errorf(codes.Internal, "failed to find user")
 	}
 

@@ -31,6 +31,10 @@ func main() {
 		log.Fatal("failed to connect to DB:", err)
 	}
 
+	if err = conn.Ping(); err != nil {
+		log.Fatal("cannot ping DB:", err)
+	}
+
 	store := db.NewStore(conn)
 	go runGatewayServer(config, store) // run in a separate go routine to avoid blocking the grpc server
 	runGRPCServer(config, store)

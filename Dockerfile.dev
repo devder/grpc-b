@@ -13,4 +13,3 @@ COPY . .
 EXPOSE 8080
 EXPOSE 9090
 CMD ["air"]
-ENTRYPOINT ["/usr/src/app/start.sh"]

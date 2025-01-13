@@ -1,7 +1,7 @@
 # use multi-stage builds to reduce the size of the final image
 
 # build stage
-FROM golang:1.23.2-alpine3.20 AS builder
+FROM golang:1.23.4-alpine3.21 AS builder
 
 WORKDIR /usr/src/app
 
@@ -15,7 +15,7 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/
 
 
 # run stage
-FROM alpine:3.20
+FROM alpine:3.21
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/main .
 COPY --from=builder /usr/src/app/migrate .
