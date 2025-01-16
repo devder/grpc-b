@@ -10,15 +10,15 @@ RUN go mod tidy
 
 COPY . .
 RUN go build -o main main.go
-RUN apk add --no-cache curl
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
+# RUN apk add --no-cache curl
+# RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
 
 
 # run stage
 FROM alpine:3.21
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/main .
-COPY --from=builder /usr/src/app/migrate .
+# COPY --from=builder /usr/src/app/migrate .
 COPY db/migrations ./db/migrations
 
 # app.env for prod is injected in CI workflow

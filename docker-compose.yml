@@ -27,7 +27,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: grpc-app
     volumes:
       - .:/usr/src/app
