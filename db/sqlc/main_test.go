@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("could not load config file: ", err)
 	}
 
-	testDb, err = sql.Open(config.DBDriver, config.DBSource)
+	testDb, err = sql.Open(config.DBDriver, "postgresql://root:password@localhost:5432/grpc?sslmode=disable")
 
 	if err != nil {
 		log.Fatal("failed to connect to DB:", err)

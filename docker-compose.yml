@@ -27,13 +27,17 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: grpc-app
+    volumes:
+      - .:/usr/src/app
     environment:
       # GIN_MODE: release
+      AIR_ENV: dev
       DB_SOURCE: postgresql://root:password@db:5432/grpc?sslmode=disable
     ports:
       - "8080:8080"
+      - "9090:9090"
     depends_on:
       db:
         condition: service_healthy
