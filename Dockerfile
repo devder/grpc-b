@@ -1,7 +1,7 @@
 # use multi-stage builds to reduce the size of the final image
 
 # build stage
-FROM golang:1.23.4-alpine3.21 AS builder
+FROM golang:1.23-alpine3.21 AS builder
 
 WORKDIR /usr/src/app
 
