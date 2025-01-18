@@ -15,12 +15,17 @@ import (
 )
 
 func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	authPayload, err := server.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
+
 	if violations := validateUpdateUserInput(req); violations != nil {
 		return nil, invalidArgumentError(violations)
 	}
 
 	arg := db.UpdateUserParams{
-		Username: req.GetUsername(),
+		Username: authPayload.Username,
 		FullName: sql.NullString{
 			Valid:  req.FullName != nil,
 			String: req.GetFullName(),
@@ -65,10 +70,6 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 }
 
 func validateUpdateUserInput(req *pb.UpdateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
-	if err := myValidator.ValidateUsername(req.GetUsername()); err != nil {
-		violations = append(violations, fieldViolation("username", err))
-	}
-
 	if req.Password != nil {
 		if err := myValidator.ValidatePassword(req.GetPassword()); err != nil {
 			violations = append(violations, fieldViolation("password", err))
