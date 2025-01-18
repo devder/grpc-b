@@ -2,11 +2,14 @@ package gapi
 
 import (
 	"context"
+	"time"
 
 	db "github.com/devder/grpc-b/db/sqlc"
 	"github.com/devder/grpc-b/pb"
 	"github.com/devder/grpc-b/util"
 	myValidator "github.com/devder/grpc-b/validator"
+	"github.com/devder/grpc-b/worker"
+	"github.com/hibiken/asynq"
 	"github.com/lib/pq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -41,6 +44,20 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 			}
 		}
 		return nil, status.Errorf(codes.Internal, "failed to create user : %s", err)
+	}
+
+	// send verify email to user
+	taskPayload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(5 * time.Second),  // add delay
+		asynq.Queue(worker.QueueCritical), // tell the task to use the critical queue
+	}
+	err = server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to distribute task: %s", err)
 	}
 
 	rsp := &pb.CreateUserResponse{
