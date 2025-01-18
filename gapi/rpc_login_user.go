@@ -8,19 +8,25 @@ import (
 	db "github.com/devder/grpc-b/db/sqlc"
 	"github.com/devder/grpc-b/pb"
 	"github.com/devder/grpc-b/util"
+	myValidator "github.com/devder/grpc-b/validator"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
+	if violations := validateLoginUserInput(req); violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+
 	user, err := server.store.GetUser(ctx, req.GetUsername())
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "incorrect password or user not found")
 		}
 
-		fmt.Println("err > %w", err)
+		fmt.Println("err :>", err)
 		return nil, status.Errorf(codes.Internal, "failed to find user")
 	}
 
@@ -73,4 +79,16 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	}
 
 	return rsp, nil
+}
+
+func validateLoginUserInput(req *pb.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := myValidator.ValidateUsername(req.GetUsername()); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+
+	if err := myValidator.ValidatePassword(req.GetPassword()); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+
+	return violations
 }

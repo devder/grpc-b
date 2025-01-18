@@ -1,0 +1,12 @@
+notes.md
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+.DS_Store
+.air.toml
+.env.example
+.git
+.gitignore
+.github
+Makefile
+README.md
