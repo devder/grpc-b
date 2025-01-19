@@ -16,6 +16,9 @@ migratedown:
 migratedown1:
 	migrate -path db/migrations -database "$(DB_URL)" -verbose down 1
 
+new_migration:
+	migrate create -ext sql -dir db/migrations -seq $(name)
+
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/devder/grpc-b/db/sqlc Store
 
@@ -38,4 +41,4 @@ proto:
 evans:
 	evans --host localhost --port 9090 -r repl
 
-.PHONY: createdb dropdb migrateup migratedown sqlc server mock test migratedown1 proto evans
+.PHONY: createdb dropdb migrateup migratedown sqlc server mock test migratedown1 proto evans new_migration
