@@ -8,6 +8,9 @@ import (
 )
 
 func TestSendEmailWithGmail(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
 	config, err := util.LoadConfig("..")
 	require.NoError(t, err)
 
@@ -18,7 +21,7 @@ func TestSendEmailWithGmail(t *testing.T) {
 		<p>This is a test message from your Go application.</p>
 	`
 
-	to := []string{"derick@eukapay.com"}
+	to := []string{config.TestEmailReceiver}
 	attachFiles := []string{"../README.md"}
 	err = sender.SendEmail(subject, content, to, nil, nil, attachFiles)
 	require.NoError(t, err)
