@@ -69,7 +69,7 @@ func (p *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tas
 	}
 
 	subject := "Welcome to My gRPC App"
-	verifyUrl := fmt.Sprintf("%s/verify_email?id=%d&secret_code=%s", p.config.ClientURL, verifyEmail.ID, verifyEmail.SecretCode)
+	verifyUrl := fmt.Sprintf("%s/verify_email?email_id=%d&secret_code=%s", p.config.ClientURL, verifyEmail.ID, verifyEmail.SecretCode)
 	content := fmt.Sprintf(`
 		Hello %s,<br/>
 		Thank you for registering with us!<br/>
