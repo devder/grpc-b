@@ -10,6 +10,7 @@ import (
 	"github.com/devder/grpc-b/api"
 	db "github.com/devder/grpc-b/db/sqlc"
 	"github.com/devder/grpc-b/gapi"
+	"github.com/devder/grpc-b/mail"
 	"github.com/devder/grpc-b/pb"
 	"github.com/devder/grpc-b/util"
 	"github.com/devder/grpc-b/worker"
@@ -53,7 +54,7 @@ func main() {
 	redisOpt := asynq.RedisClientOpt{Addr: config.RedisAddress}
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
-	go runTaskProcessor(redisOpt, store)
+	go runTaskProcessor(redisOpt, store, config)
 	go runGatewayServer(config, store, taskDistributor) // run in a separate go routine to avoid blocking the grpc server
 	runGRPCServer(config, store, taskDistributor)
 }
@@ -71,8 +72,9 @@ func runDBMigration(migrationURL, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
-	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
+func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store, config util.Config) {
+	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store, config, mailer)
 	log.Info().Msg("start task processor")
 
 	if err := taskProcessor.Start(); err != nil {

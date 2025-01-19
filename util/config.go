@@ -22,6 +22,7 @@ type Config struct {
 	EmailSenderAddress   string        `mapstructure:"EMAIL_SENDER_ADDRESS"`
 	EmailSenderPassword  string        `mapstructure:"EMAIL_SENDER_PASSWORD"`
 	TestEmailReceiver    string        `mapstructure:"TEST_EMAIL_RECEIVER"`
+	ClientURL            string        `mapstructure:"CLIENT_URL"`
 }
 
 // reads config from a path if it exists
