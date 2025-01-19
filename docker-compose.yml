@@ -42,3 +42,15 @@ services:
       db:
         condition: service_healthy
         restart: true
+
+  redis:
+    image: redis:alpine
+    container_name: grpc-app-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
