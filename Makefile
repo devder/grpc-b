@@ -21,6 +21,7 @@ new_migration:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/devder/grpc-b/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributor.go github.com/devder/grpc-b/worker TaskDistributor
 
 sqlc:
 	sqlc generate
