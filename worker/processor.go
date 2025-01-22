@@ -4,6 +4,8 @@ import (
 	"context"
 
 	db "github.com/devder/grpc-b/db/sqlc"
+	"github.com/devder/grpc-b/mail"
+	"github.com/devder/grpc-b/util"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 )
@@ -21,9 +23,11 @@ type TaskProcessor interface {
 type RedisTaskProcessor struct {
 	server *asynq.Server
 	store  db.Store
+	config util.Config
+	mailer mail.EmailSender
 }
 
-func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskProcessor {
+func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store, config util.Config, mailer mail.EmailSender) TaskProcessor {
 	server := asynq.NewServer(
 		redisOpt,
 		asynq.Config{
@@ -45,6 +49,8 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskPr
 	return &RedisTaskProcessor{
 		server: server,
 		store:  store,
+		config: config,
+		mailer: mailer,
 	}
 }
 

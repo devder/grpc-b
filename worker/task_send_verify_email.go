@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	db "github.com/devder/grpc-b/db/sqlc"
+	"github.com/devder/grpc-b/util"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 )
@@ -55,6 +57,29 @@ func (p *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tas
 			return fmt.Errorf("user doesn't exist: %w", asynq.SkipRetry)
 		}
 		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	verifyEmail, err := p.store.CreateVerifyEmail(ctx, db.CreateVerifyEmailParams{
+		Username:   user.Username,
+		Email:      user.Email,
+		SecretCode: util.RandomString(32),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create verify email: %w", err)
+	}
+
+	subject := "Welcome to My gRPC App"
+	verifyUrl := fmt.Sprintf("%s/verify_email?email_id=%d&secret_code=%s", p.config.ClientURL, verifyEmail.ID, verifyEmail.SecretCode)
+	content := fmt.Sprintf(`
+		Hello %s,<br/>
+		Thank you for registering with us!<br/>
+		Please <a href="%s">click here</a> to verify your email address.<br/>
+	`, user.FullName, verifyUrl)
+	to := []string{verifyEmail.Email}
+
+	err = p.mailer.SendEmail(subject, content, to, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to send verify email: %w", err)
 	}
 
 	log.Info().
