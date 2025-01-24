@@ -8,7 +8,14 @@ sql:
       go:
         package: "db" # package name
         out: "db/sqlc" # output directory
-        sql_package: "database/sql" # or "pgx/v5" - driver package
+        sql_package: "pgx/v5" # or "database/sql" - driver package
         emit_json_tags: true
         emit_empty_slices: true
         emit_interface: true
+        overrides:
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "numeric"
+            go_type: "string"
