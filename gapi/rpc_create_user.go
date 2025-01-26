@@ -2,12 +2,14 @@ package gapi
 
 import (
 	"context"
+	"time"
 
 	db "github.com/devder/grpc-b/db/sqlc"
 	"github.com/devder/grpc-b/pb"
 	"github.com/devder/grpc-b/util"
 	myValidator "github.com/devder/grpc-b/validator"
-	"github.com/lib/pq"
+	"github.com/devder/grpc-b/worker"
+	"github.com/hibiken/asynq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,27 +26,39 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, status.Errorf(codes.Internal, "failed to hash password : %s", err)
 	}
 
-	arg := db.CreateUserParams{
-		Username:       req.GetUsername(),
-		HashedPassword: hashedPassword,
-		FullName:       req.GetFullName(),
-		Email:          req.GetEmail(),
+	arg := db.CreateUserTxParams{
+		CreateUserParams: db.CreateUserParams{
+			Username:       req.GetUsername(),
+			HashedPassword: hashedPassword,
+			FullName:       req.GetFullName(),
+			Email:          req.GetEmail(),
+		},
+		AfterCreate: func(user db.User) error {
+			// send verify email to user
+			taskPayload := &worker.PayloadSendVerifyEmail{
+				Username: user.Username,
+			}
+			opts := []asynq.Option{
+				asynq.MaxRetry(10),
+				asynq.ProcessIn(5 * time.Second),  // add delay
+				asynq.Queue(worker.QueueCritical), // tell the task to use the critical queue
+			}
+
+			return server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
+		},
 	}
 
-	user, err := server.store.CreateUser(ctx, arg)
+	createUserTxRes, err := server.store.CreateUserTx(ctx, arg)
 	if err != nil {
-		if pqError, ok := err.(*pq.Error); ok {
-
-			switch pqError.Code.Name() {
-			case "unique_violation":
-				return nil, status.Errorf(codes.AlreadyExists, "username already exists : %s", err)
-			}
+		if db.ErrCode(err) == db.UniqueViolation {
+			return nil, status.Error(codes.AlreadyExists, err.Error())
 		}
+
 		return nil, status.Errorf(codes.Internal, "failed to create user : %s", err)
 	}
 
 	rsp := &pb.CreateUserResponse{
-		User: convertUser(user),
+		User: convertUser(createUserTxRes.User),
 	}
 
 	return rsp, nil
