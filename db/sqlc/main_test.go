@@ -8,7 +8,6 @@ import (
 
 	"github.com/devder/grpc-b/util"
 	"github.com/jackc/pgx/v5/pgxpool"
-	_ "github.com/lib/pq"
 )
 
 var testStore Store // define as global var bc we would use it in all our unit tests

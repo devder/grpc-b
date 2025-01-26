@@ -9,7 +9,6 @@ import (
 	"github.com/devder/grpc-b/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 type createUserRequest struct {
@@ -60,15 +59,8 @@ func (server *Server) createUser(ctx *gin.Context) {
 
 	user, err := server.store.CreateUser(ctx, arg)
 	if err != nil {
-		if pqError, ok := err.(*pq.Error); ok {
-
-			switch pqError.Code.Name() {
-			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(pqError))
-				return
-			}
-
-			ctx.JSON(http.StatusBadRequest, errorResponse(pqError))
+		if db.ErrCode(err) == db.UniqueViolation {
+			ctx.JSON(http.StatusForbidden, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
