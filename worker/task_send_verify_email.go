@@ -2,8 +2,8 @@ package worker
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	db "github.com/devder/grpc-b/db/sqlc"
@@ -53,7 +53,7 @@ func (p *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tas
 
 	user, err := p.store.GetUser(ctx, payload.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return fmt.Errorf("user doesn't exist: %w", asynq.SkipRetry)
 		}
 		return fmt.Errorf("failed to get user: %w", err)
@@ -77,9 +77,11 @@ func (p *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tas
 	`, user.FullName, verifyUrl)
 	to := []string{verifyEmail.Email}
 
-	err = p.mailer.SendEmail(subject, content, to, nil, nil, nil)
-	if err != nil {
-		return fmt.Errorf("failed to send verify email: %w", err)
+	if p.config.Environment == "prod" {
+		err = p.mailer.SendEmail(subject, content, to, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf("failed to send verify email: %w", err)
+		}
 	}
 
 	log.Info().
