@@ -6,12 +6,12 @@ metadata:
 data:
   # authenticate with IAM, this useful when you want to grant auth to a user who is not the creator of the cluster
   mapUsers: |
-    - userarn: arn:aws:iam::975049907833:user/achiever
-      username: achiever
+    - userarn: arn:aws:iam::037194225538:user/devder
+      username: devder
       groups:
         - system:masters
   mapRoles: |
-    - rolearn: arn:aws:iam::975049907833:role/GitHubActionsRole
+    - rolearn: arn:aws:iam::037194225538:role/GitHubActionsRole
       username: github-actions
       groups:
         - system:masters
