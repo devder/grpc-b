@@ -37,6 +37,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
 		req.GetUsername(),
+		user.Role,
 		server.config.AccessTokenDuration,
 	)
 
@@ -46,6 +47,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(
 		req.GetUsername(),
+		user.Role,
 		server.config.RefreshTokenDuration,
 	)
 

@@ -64,7 +64,7 @@ func TestUpdateUserAPI(t *testing.T) {
 					Return(updatedUser, nil)
 			},
 			buildContext: func(t *testing.T, m token.Maker) context.Context {
-				return newCtxWithBearerToken(t, m, user.Username, time.Minute)
+				return newCtxWithBearerToken(t, m, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.NoError(t, err)
@@ -89,7 +89,7 @@ func TestUpdateUserAPI(t *testing.T) {
 					Return(db.User{}, db.ErrRecordNotFound)
 			},
 			buildContext: func(t *testing.T, m token.Maker) context.Context {
-				return newCtxWithBearerToken(t, m, user.Username, 1*time.Minute)
+				return newCtxWithBearerToken(t, m, user.Username, user.Role, 1*time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -112,7 +112,7 @@ func TestUpdateUserAPI(t *testing.T) {
 			},
 			buildContext: func(t *testing.T, m token.Maker) context.Context {
 				// expired token
-				return newCtxWithBearerToken(t, m, user.Username, -time.Minute)
+				return newCtxWithBearerToken(t, m, user.Username, user.Role, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -155,7 +155,7 @@ func TestUpdateUserAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, m token.Maker) context.Context {
-				return newCtxWithBearerToken(t, m, user.Username, 1*time.Minute)
+				return newCtxWithBearerToken(t, m, user.Username, user.Role, 1*time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
