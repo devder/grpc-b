@@ -77,7 +77,7 @@ func (p *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, tas
 	`, user.FullName, verifyUrl)
 	to := []string{verifyEmail.Email}
 
-	if p.config.Environment == "prod" {
+	if p.config.Environment == "production" {
 		err = p.mailer.SendEmail(subject, content, to, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to send verify email: %w", err)
