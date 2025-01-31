@@ -3,7 +3,6 @@ package gapi
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	db "github.com/devder/grpc-b/db/sqlc"
@@ -24,11 +23,6 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 
 	if violations := validateUpdateUserInput(req); violations != nil {
 		return nil, invalidArgumentError(violations)
-	}
-
-	if authPayload.Role != util.BankerRole {
-		fmt.Println("auth payload. role", authPayload.Role)
-		return nil, fmt.Errorf("cannot update other user's info")
 	}
 
 	arg := db.UpdateUserParams{
