@@ -11,3 +11,7 @@ updates:
       include: "scope"
     allow:
       - dependency-type: "direct"
+    target-branch: "develop"
+    vulnerability-alerts:
+      enabled: true
+      severities: ["high", "critical"]
